@@ -1,0 +1,148 @@
+var lineAnimLen = .5;
+var lineFadeInTime = 300;
+var strokeColor_inactive = {r:100, g:100, b:100};
+var strokeWeight_inactive = 1;
+var lineBG = {r:200, g:200, b:0, alpha: 0};
+
+
+var line1Params = {
+					  top: 350, 
+			          left: 100,
+			          width: 100,
+			          height: 200,
+			          startY: 185,
+			          endY: 15,
+			          dWidth: 62,
+			          animLen: lineAnimLen,
+			          fadeInTime: lineFadeInTime,
+			          position: "absolute",
+			          strokeWeight: strokeWeight_inactive,
+			          strokeColor: strokeColor_inactive,
+			          bgColor: lineBG,
+			          active: false
+		          };
+		          
+var line2Params = {
+					  top: 540, 
+			          left: 100,
+			          width: 100,
+			          height: 200,
+			          startY: 15,
+			          endY: 170,
+			          dWidth: 62,
+			          animLen: lineAnimLen,
+			          fadeInTime: lineFadeInTime,
+			          position: "absolute",
+			          strokeWeight: strokeWeight_inactive,
+			          strokeColor: strokeColor_inactive,
+			          bgColor: lineBG, 
+			          active: false
+		          };
+
+function animatePolyLine(_p){
+	var pctDone = _p._v.animStep/_p._v.animLen;
+	
+	var currDist = _p._v.totalDist * pctDone;
+	
+	_p.background(_p._v.bgColor.r, _p._v.bgColor.g, _p._v.bgColor.b, _p._v.bgColor.alpha);
+	_p.noFill();
+	_p.stroke(_p._v.strokeColor.r, _p._v.strokeColor.g, _p._v.strokeColor.b);
+	_p.strokeWeight(_p._v.strokeWeight);
+	
+	if (currDist <= _p._r1.end){
+		_p.line(_p._p0.x, _p._p0.y, currDist, _p._p1.y);
+	}
+	else if ((currDist > _p._r2.start)&&(currDist <= _p._r2.end)){
+		_p.line(_p._p0.x, _p._p0.y, _p._p1.x, _p._p1.y);
+		
+		newPoint = getPointAtDistance(_p._p1, _p._p2, currDist - _p._v.hWidth)
+		_p.line(_p._p1.x, _p._p1.y, newPoint.x, newPoint.y);
+	}
+	else if ((currDist > _p._r3.start)&&(currDist <= _p._r3.end)){
+		_p.line(_p._p0.x, _p._p0.y, _p._p1.x, _p._p1.y);
+		_p.line(_p._p1.x, _p._p1.y, _p._p2.x, _p._p2.y);
+		_p.line(_p._p2.x, _p._p2.y, _p._p2.x + currDist - _p._v.totalDist + _p._v.hWidth , _p._p3.y);
+	}
+	else{
+		if ( _p._v.animStep >= _p._v.animLen) {
+			_p._v.animStep = 0;
+			_p.line(_p._p0.x, _p._p0.y, _p._p1.x, _p._p1.y);
+			_p.line(_p._p1.x, _p._p1.y, _p._p2.x, _p._p2.y);
+			_p.line(_p._p2.x, _p._p2.y, _p._p3.x , _p._p3.y);
+			_p.exit();
+		}
+	}
+	//_p.line(0, 10, c.width*pctDone, 10)
+
+	_p._v.animStep++;
+}     
+function connectorLineBlock(_p){//}, _width, _height, _startY, _endY, _dWidth, _animLen) {
+			// Override draw function, by default it will be called 60 times per second
+	   		_p.width = _p._v.width;
+	   		_p.height = _p._v.height;
+	   						
+			_p._v.hWidth = 0;
+			if (_p._v.dWidth > _p._v.width){
+				_p._v.dWidth = _p._v.width;
+			}
+			else {
+				_p._v.hWidth = (_p._v.width-_p._v.dWidth)/2;
+			} 
+			_p._v.FR = 30;
+			_p._v.animLen = _p._v.animLen * _p._v.FR;	
+			_p._v.animStep = 0;	
+
+			_p._v.dWidth = _p._v.dWidth;	
+			_p.frameRate(_p._v.FR);	
+			
+			_p._v.totalDist = _p._v.hWidth*2 +  _p.dist(_p._v.hWidth, _p._v.startY, _p.width - _p._v.hWidth, _p._v.endY);
+			
+		    _p._r1 = {
+		    				  start: 0, 
+		    	              end:_p._v.hWidth
+		    	            };
+		    	             
+		    _p._r2 = {
+		    				  start: _p._v.hWidth, 
+		    	              end: _p._v.totalDist - _p._v.hWidth
+		    	            };
+		    	          
+		    _p._r3 = {
+		    				  start: _p._v.totalDist - _p._v.hWidth, 
+		    	              end: _p._v.totalDist
+		    	            };
+
+		     
+		    _p._p0 = {x: 0, 		    			y: _p._v.startY};
+		    _p._p1 = {x: _p._v.hWidth, 				y: _p._v.startY};
+		    _p._p2 = {x: _p.width - _p._v.hWidth , 	y: _p._v.endY};
+		    _p._p3 = {x: _p.width, 				    y: _p._v.endY};
+			 			     
+			_p.draw = function() {
+				animatePolyLine(_p);
+			};
+	}
+	          
+	          
+function zConnector(id, parentElt, params){
+	var _th = this;
+	this.canv = document.createElement("canvas");
+	this.canv.setAttribute("id", id);
+	parentElt.appendChild(canv);
+	
+	this.params = params;
+	
+	this.processingInstance = function(_th){ 
+			new Processing(canv, function(_p){	
+				_p.externals.canvas.style.position = _th.params.position;
+		    	_p.externals.canvas.style.left = _px(_th.params.left);
+		   	    _p.externals.canvas.style.top = _px(_th.params.top);
+		        _p._v = _th.params;
+		        $(_p.externals.canvas).fadeTo(0, 0).fadeTo(_th.params.fadeInTime, 1);
+			    connectorLineBlock(_p);   
+			});
+	}
+	this.processingInstance(this);
+	
+}
+
