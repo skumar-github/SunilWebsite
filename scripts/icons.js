@@ -15,9 +15,9 @@ var rootIconMoveTime = 600;
 var defaultIconParams = {
 		id: "icon-sk_k",
 		parent: document.body,
-	    img_active_src: "./images/icons/sk/icon_sk_w.png",
-	    img_inactive_src: "./images/icons/sk/icon_sk_g.png",
-	    img_hover_src: "./images/icons/sk/icon_sk_o.png",
+	    //img_active_src: "./images/icons/sk/icon_sk_w.png",
+	    //img_inactive_src: "./images/icons/sk/icon_sk_g.png",
+	    //img_hover_src: "./images/icons/sk/icon_sk_o.png",
 	    height: defaultIconHeight,
 	    width: defaultIconWidth,
 	    top: 0,
@@ -44,13 +44,13 @@ function iconImage(id, src, parent, params){
 	img.width = params.width;
 	img.src = src;
 	img.style.position = params.position;
-	img.style.top = _px(_i(params.top));
+	img.style.top = _px(params.top);
 	img.style.left = _px(params.left);
 	img.style.height = _px(params.height);
 	img.style.width = _px(params.width);
 	img.style.cursor = "pointer";
 	//img.style.display = "block";
-	img.style.opacity = 0;
+	img.style.opacity = 1;
 	parent.appendChild(img);
 	return img;
 }
@@ -80,7 +80,7 @@ function getChildIconLayout(that){
 	}
 	if (that.params.childLayout == 'top'){
 		//calculate total height			
-		var startTop = _i(that.img_active.style.top) + that.params.height/2 - childParams[0].height/2;
+		var startTop = _i(that.icon_active.style.top) + that.params.height/2 - childParams[0].height/2;
 		var startLeft = that.params.left + that.params.width + that.params.childSpacerHoriz;
 		
 		var currTop = startTop;
@@ -120,7 +120,7 @@ function showChildIcons(that){
 				
 				var childLeftCenter = that.params.childIconParams[i].top + that.params.childIconParams[i].height/2;
 				//var thatRightCenter = that.params.top + that.params.height/2;	
-				var thatRightCenter = _i(that.img_active.style.top) + that.params.height/2;	
+				var thatRightCenter = _i(that.icon_active.style.top) + that.params.height/2;	
 									   
 				var lTop = (childLeftCenter>thatRightCenter) ? thatRightCenter: childLeftCenter;						   
 				var lLeft = that.params.left  + that.params.width;	
@@ -132,7 +132,7 @@ function showChildIcons(that){
 				//		   	   that.params.top -  that.params.height/2);	
 				var lHeight = (that.params.childIconParams[i].top  + 
 						   	   that.params.childIconParams[i].height/2 -
-						   	   _i(that.img_active.style.top) -  that.params.height/2);				
+						   	   _i(that.icon_active.style.top) -  that.params.height/2);				
 				var GAMMA = 1;
 				if (lHeight == 0){
 					lHeight = zConnector_defaults.lineWidth_inactive + 1;
@@ -165,20 +165,20 @@ function showChildIcons(that){
 }
 
 function hideIcon(that, fadeOutTime){
-	$(that.img_active).fadeTo(fadeOutTime, 0);
-	$(that.img_hover).fadeTo(fadeOutTime, 0);
-	$(that.img_inactive).fadeTo(fadeOutTime, 0)
-	$(that.img_hover).unbind('mouseenter mouseleave');
+	$(that.icon_active).fadeTo(fadeOutTime, 0);
+	$(that.icon_hover).fadeTo(fadeOutTime, 0);
+	$(that.icon_inactive).fadeTo(fadeOutTime, 0)
+	$(that.icon_hover).unbind('mouseenter mouseleave');
 }
 	
 function showIcon(that){
 	var delayVal = (that.parentIcon) ? 0 : 0;
-	$(that.img_active).fadeTo(0, 0);
-	$(that.img_hover).fadeTo(0, 0);
+	$(that.icon_active).fadeTo(0, 0);
+	$(that.icon_hover).fadeTo(0, 0);
 	
 	if(!that.params["hidden"]){
-		$(that.img_inactive).fadeTo(0, 0).delay(delayVal).fadeTo(iconFadeIn, 1);
-		$(that.img_hover).hover(function(){
+		$(that.icon_inactive).fadeTo(0, 0).delay(delayVal).fadeTo(iconFadeIn, 1);
+		$(that.icon_hover).hover(function(){
 				$(this).stop().fadeTo(iconFadeOut, 1);
 			}, 
 		   function(){
@@ -188,19 +188,17 @@ function showIcon(that){
 		return delayVal + iconFadeIn
 	}
 	else{
-		$(that.img_inactive).fadeTo(0, 0);
-		$(that.img_hover).unbind('mouseenter mouseleave');
+		$(that.icon_inactive).fadeTo(0, 0);
+		$(that.icon_hover).unbind('mouseenter mouseleave');
 	}
 	//$(that.inactiveContent).fadeTo(0,0).delay(delayVal).fadeTo(1000, 1);
-	
-
 }
 	
 function deactivateIcon(that){
 	////console.log("DEACTIVATING: " + that.params.id)
-	$(that.img_active).stop().fadeTo(iconFadeOut, 0);
-	$(that.img_hover).stop().fadeTo(iconFadeOut, 0);
-	$(that.img_inactive).stop().fadeTo(iconFadeIn, 1);	
+	$(that.icon_active).stop().fadeTo(iconFadeOut, 0);
+	$(that.icon_hover).stop().fadeTo(iconFadeOut, 0);
+	$(that.icon_inactive).stop().fadeTo(iconFadeIn, 1);	
 	
 	if (that.params.childIcons.length){
 		//that.params.childIcons[0].deactivateSiblings();
@@ -217,17 +215,17 @@ function deactivateIcon(that){
 	that.params.active = false;	
 	
 	if ((that.params.id == rootIconTag) && rootMoved){
-		 $(that.img_inactive).delay(iconFadeIn).animate({
-			top: '+=' + (that.params.top - _i(that.img_inactive.style.top)),
+		 $(that.icon_inactive).delay(iconFadeIn).animate({
+			top: '+=' + (that.params.top - _i(that.icon_inactive.style.top)),
 			  }, rootIconMoveTime, function() {
 			    // Animation complete.
-		 		that.img_active.style.top = that.img_inactive.style.top;
-		 		that.img_active.style.left = that.img_inactive.style.left;
-		 		that.img_hover.style.top = that.img_inactive.style.top;
-		 		that.img_hover.style.left = that.img_inactive.style.left;
+		 		that.icon_active.style.top = that.icon_inactive.style.top;
+		 		that.icon_active.style.left = that.icon_inactive.style.left;
+		 		that.icon_hover.style.top = that.icon_inactive.style.top;
+		 		that.icon_hover.style.left = that.icon_inactive.style.left;
 			    rootMoved = !rootMoved;
 			    that.hide(iconFadeOut*2);
-			    //showIntro();
+			    showIntro();
 		 });
 	}
 }
@@ -258,9 +256,9 @@ function activateIcon(that){
 	that.deactivateSiblings();
 	that.showChildIcons();						
 							
-	$(that.img_active).stop().fadeTo(iconFadeIn, 1);
-	$(that.img_hover).stop().fadeTo(iconFadeOut, 0);
-	$(that.img_inactive).stop().fadeTo(iconFadeOut, 0);
+	$(that.icon_active).stop().fadeTo(iconFadeIn, 1);
+	$(that.icon_hover).stop().fadeTo(iconFadeOut, 0);
+	$(that.icon_inactive).stop().fadeTo(iconFadeOut, 0);
 	that.params.active = true;	
 	that.highlightParentConnector();
 }
@@ -274,16 +272,16 @@ function onclickIcon(that){
 		// Deactivate Siblings		
 		//$('#clickme').click(function() {
 		 if ((that.params.id == rootIconTag) && !rootMoved){
-			 $(that.img_hover).stop().fadeTo(0, 0);
-			 $(that.img_active).stop().fadeTo(0, 0);
-			 $(that.img_inactive).animate({
-				top: '-=' + (_i(that.img_inactive.style.top) - rootIconDistFromTop).toString(),
+			 $(that.icon_hover).stop().fadeTo(0, 0);
+			 $(that.icon_active).stop().fadeTo(0, 0);
+			 $(that.icon_inactive).animate({
+				top: '-=' + (_i(that.icon_inactive.style.top) - rootIconDistFromTop).toString(),
 				  }, rootIconMoveTime, function() {
 				    // Animation complete.
-			 		that.img_active.style.top = that.img_inactive.style.top;
-			 		that.img_active.style.left = that.img_inactive.style.left;
-			 		that.img_hover.style.top = that.img_inactive.style.top;
-			 		that.img_hover.style.left = that.img_inactive.style.left;
+			 		that.icon_active.style.top = that.icon_inactive.style.top;
+			 		that.icon_active.style.left = that.icon_inactive.style.left;
+			 		that.icon_hover.style.top = that.icon_inactive.style.top;
+			 		that.icon_hover.style.left = that.icon_inactive.style.left;
 				    that.activate();
 				    rootMoved = !rootMoved
 			 });
@@ -301,53 +299,21 @@ function icon(params, parentIcon){
 	
 	this.params = (params) ? mergeParams(params, defaultIconParams) : defaultIconParams;	
 	////console.log("ICON PARAMS after: " + params.id)					  	
-	this.img_active = iconImage(this.params.id + "_img-active", 
-							  	this.params.img_active_src, 
+	this.icon_active = iconImage(this.params.id + "_img-active", 
+							  	this.params.icon_active_src, 
 							  	this.params.parent, 
 							  	this.params);
-	
-	this.img_inactive = iconImage(this.params.id + "_img-inactive", 
-							  this.params.img_inactive_src, 
-							  this.params.parent, 
-							  this.params);
-	
-	this.img_hover =   iconImage(this.params.id + "_img-hover", 
-						  	this.params.img_hover_src, 
+
+	this.icon_inactive = iconDiv(this.params.id + "_img-inactive", 
+							  	 this.params.parent, 
+							  	 this.params);
+		
+	this.icon_hover =   iconImage(this.params.id + "_img-hover", 
+						  	this.params.icon_hover_src, 
 						  	this.params.parent, 
 						  	this.params);
 
-	//function setOnload(that){
-	 that.img_inactive.onload = function(){if (this.parentNode == document.body) this.style.opacity = 0};
-     that.img_active.onload = function(){if (this.parentNode == document.body) this.style.opacity = 0};
-     that.img_hover.onload = function(){if (this.parentNode == document.body) this.style.opacity = 0};
-     $(that.img_inactive).load(function(){that.show();}); 
-	//}
-	//this.setOnload = function(){setOnload(that)};
-	
-	if (this.params["inactiveContent_params"]){
-
-		this.inactiveContent = null;
-		if (this.params["inactiveContent_params"]["type"] == "image") {
-			this.inactiveContent = document.createElement("img");
-			this.inactiveContent.src = this.params["inactiveContent_params"]["src"];
-		}
-		
-		
-		this.inactiveContent.setAttribute("id", this.params["id"] + "_inactiveContent");
-		this.inactiveContent.height = this.params["inactiveContent_params"]["height"];
-		this.inactiveContent.width = this.params["inactiveContent_params"]["width"];
-		
-		if (this.params["inactiveContent_params"]["alignment"] == "right") {
-			this.inactiveContent.style.position = this.params["position"];
-			this.inactiveContent.style.left = _px(this.params["left"] + this.params["width"] + defaultContentSpacerHoriz);
-			this.inactiveContent.style.top = _px(this.params["top"]) ;
-			
-			console.log("ALIGN RIGHT: " + this.params["top"] + " " + this.params["left"])
-		}
-		document.body.appendChild(this.inactiveContent);
-		// = this.params["inactiveContent_params"]["src"];
-			
-	}
+     $(that.icon_inactive).load(function(){that.show();}); 
 
 
 	this.showChildIcons = function(){showChildIcons(that)};
@@ -365,7 +331,7 @@ function icon(params, parentIcon){
 	};
 	this.highlightParentConnector = function(){highlightParentConnector(that)};
 
-	this.img_hover.onclick = function(){onclickIcon(that)};
+	this.icon_hover.onclick = function(){onclickIcon(that)};
 }
 
 
